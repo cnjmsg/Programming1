@@ -25,7 +25,7 @@ public class MultiUserChatClientGUI extends JFrame
 	JTextArea inputField = new JTextArea(3,40);
 	JButton sendButton = new JButton("Send");
 
-	BufferedReader userInput;
+	//BufferedReader userInput;
 	PrintStream userOutput;
 	
 	Socket socket;
@@ -38,7 +38,7 @@ public class MultiUserChatClientGUI extends JFrame
 	public MultiUserChatClientGUI() throws IOException {
 		setTitle("Teams/Whatsapp/Slack");
 
-		userInput = new BufferedReader(new InputStreamReader(System.in));
+		//userInput = new BufferedReader(new InputStreamReader(System.in));
 		userOutput = new PrintStream(System.out);
 		
 		socket = new Socket("localhost", 3000);
