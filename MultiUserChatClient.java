@@ -5,36 +5,50 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+class MessageHandler extends Thread {
+	BufferedReader socketInput;
+	
+	public MessageHandler(BufferedReader socketInput){	
+		this.socketInput = socketInput;
+		
+	}
+	
+	public void run() {
+		while(MultiUserChatClient.active) {
+			try {
+				if(socketInput != null && socketInput.ready()) {
+					String message = socketInput.readLine();
+					System.out.println(message);
+				}
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+}
+
 public class MultiUserChatClient extends Thread {
 
-	Socket socket;
-	BufferedReader socketInput;
-	PrintStream socketOutput;
-	
-	BufferedReader userInput;
-	PrintStream userOutput;
-	boolean active;
-	
-	public MultiUserChatClient() throws IOException {
-		userInput = new BufferedReader(new InputStreamReader(System.in));
-		userOutput = new PrintStream(System.out);
-		
-		socket = new Socket("localhost", 3000);
-		socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		socketOutput = new PrintStream(socket.getOutputStream());
+	public static boolean active;
 
-		userOutput.print("Type your name:");
-		String name = userInput.readLine();
-		socketOutput.println(name);
-		
-		active = true;
-		new MessageHandler(socketInput).start();
-		userOutput.println("Type your messages to everyone (bye to exit)");
+	public static void main(String[] args) {
+		try( 
+			BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
+			PrintStream userOutput = new PrintStream(System.out);
+			
+			Socket socket = new Socket("localhost", 3000);
+			BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			PrintStream socketOutput = new PrintStream(socket.getOutputStream());
+			){
 
-	}
-
-	public void run() {
-		try {
+			userOutput.print("Type your name:");
+			String name = userInput.readLine();
+			socketOutput.println(name);
+			
+			active = true;
+			new MessageHandler(socketInput).start();
+			userOutput.println("Type your messages to everyone (bye to exit)");
 			while(active) {
 				try {
 					String msg = userInput.readLine();
@@ -51,64 +65,19 @@ public class MultiUserChatClient extends Thread {
 					e.printStackTrace();
 				}								
 			}
-		}finally {
-			close();
-		}
-
-	}
-	
-	public void showMessage(String message) {
-		userOutput.println(message);	
-	}
-	
-	public void close() {
-		try {
-			//Thread.sleep(2000);
-			if(socket != null && ! socket.isClosed()) {
-				socket.close();
-			}
 		}catch(Exception e) {
 			e.printStackTrace();
-		}
-	}
-
-	class MessageHandler extends Thread {
-		
-		BufferedReader socketInput;
-		
-		public MessageHandler(BufferedReader socketInput){	
-			this.socketInput = socketInput;
-			
-		}
-		
-		public void run() {
-			while(active) {
-				try {
-					if(socketInput != null && socketInput.ready()) {
-						String message = socketInput.readLine();
-						//userOutput.println("Received:"+message);
-						showMessage(message);
-					}
-				}catch(Exception e) {
-					e.printStackTrace();
+		}finally {
+			/*
+			try {
+				//Thread.sleep(2000);
+				if(socket != null && ! socket.isClosed()) {
+					socket.close();
 				}
+			}catch(Exception e) {
+				e.printStackTrace();
 			}
-		}
-		
-	}
-	
-	public static void main(String[] args) {
-		MultiUserChatClient client = null;
-		try {
-			client = new MultiUserChatClient();
-			client.start();
-			client.join();
-		}catch(Exception e) {
-			e.printStackTrace();
-		}finally {
-			if(client != null) {
-				client.close();
-			}
+			*/
 		}
 
 	}
