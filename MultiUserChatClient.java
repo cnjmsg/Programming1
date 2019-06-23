@@ -33,11 +33,15 @@ public class MultiUserChatClient extends Thread {
 	public static boolean active;
 
 	public static void main(String[] args) {
+		String serverAddress = "localhost";
+		if(args.length > 0){
+			serverAddress = args[0];
+		}
 		try( 
 			BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
 			PrintStream userOutput = new PrintStream(System.out);
 			
-			Socket socket = new Socket("localhost", 3000);
+			Socket socket = new Socket(serverAddress, 3000);
 			BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			PrintStream socketOutput = new PrintStream(socket.getOutputStream());
 			){
